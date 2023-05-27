@@ -23,4 +23,4 @@ repo_name: "TBD"
 repo: ucsb-cs156-s23/proj-courses-staff
 owner: ucsb-cs156-s23
 repo_name: proj-courses-staff
-pull_requests: [{"author":{"id":"MDQ6VXNlcjExMTkwMTc=","is_bot":false,"login":"pconrad","name":"Phill Conrad"},"headRefName":"pc-spike-on-grade-data-csv-upload","number":1,"title":"pc - spike on uploading grade data via csv","url":"https://github.com/ucsb-cs156-s23/proj-courses-staff/pull/1"}]
+pull_requests: [{"author":{"id":"MDQ6VXNlcjExMTkwMTc=","is_bot":false,"login":"pconrad","name":"Phill Conrad"},"headRefName":"pc-spike-on-background-job-for-grade-data","number":2,"title":"Pc spike on background job for grade data","url":"https://github.com/ucsb-cs156-s23/proj-courses-staff/pull/2"},{"author":{"id":"MDQ6VXNlcjExMTkwMTc=","is_bot":false,"login":"pconrad","name":"Phill Conrad"},"headRefName":"pc-spike-on-grade-data-csv-upload","number":1,"title":"pc - spike on uploading grade data via csv","url":"https://github.com/ucsb-cs156-s23/proj-courses-staff/pull/1"}]
