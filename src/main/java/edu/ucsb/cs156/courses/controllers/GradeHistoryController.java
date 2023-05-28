@@ -4,6 +4,7 @@ import edu.ucsb.cs156.courses.entities.GradeHistory;
 
 import edu.ucsb.cs156.courses.repositories.GradeHistoryRepository;
 import edu.ucsb.cs156.courses.services.UCSBGradeHistoryService;
+import edu.ucsb.cs156.courses.utilities.CourseUtilities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -41,34 +42,15 @@ public class GradeHistoryController extends ApiController {
     @Autowired
     ObjectMapper mapper;
 
-    @Autowired
-    UCSBGradeHistoryService ucsbGradeHistoryService;
-
     @ApiOperation(value = "Get grade history for a course")
     @GetMapping(value = "/search", produces = "application/json")
     public Iterable<GradeHistory> gradeHistoryBySubjectAreaAndCourseNumber(
         @RequestParam String subjectArea,
         @RequestParam String courseNumber
     )  {
-      Iterable<GradeHistory> gradeHistoryRows = gradeHistoryRepository.findBySubjectAreaAndCourse(subjectArea, courseNumber);
+      String course=CourseUtilities.makeFormattedCourseId(subjectArea, courseNumber);
+      Iterable<GradeHistory> gradeHistoryRows = gradeHistoryRepository.findByCourse(course);
       return gradeHistoryRows;
     }
-
-    @ApiOperation(value = "Load grade history into database from uploaded CSV")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = "upload", produces = "application/json")
-    public ResponseEntity<String> uploadCSV(@RequestPart MultipartFile file) throws IOException{
-      log.info("Starting upload CSV");
-      try {
-        Reader reader = new InputStreamReader(file.getInputStream());
-        List<GradeHistory> uploadedRows = ucsbGradeHistoryService.parse(reader);
-        List<GradeHistory> savedCourse = (List<GradeHistory>) gradeHistoryRepository.upsertAll(uploadedRows);
-        String body = mapper.writeValueAsString(savedCourse);
-        return ResponseEntity.ok().body(body);
-      } catch(Exception e){
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Malformed CSV", e);
-      }
-    }
-
 
 }

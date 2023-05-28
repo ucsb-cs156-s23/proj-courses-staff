@@ -1,9 +1,7 @@
 package edu.ucsb.cs156.courses.jobs;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import org.hibernate.JDBCException;
-import org.hibernate.exception.ConstraintViolationException;
 
 import edu.ucsb.cs156.courses.entities.GradeHistory;
 import edu.ucsb.cs156.courses.repositories.GradeHistoryRepository;
@@ -26,37 +24,43 @@ public class UploadGradeDataJob implements JobContextConsumer {
         List<String> urls = ucsbGradeHistoryService.getUrls();
 
         GradeHistory previous = new GradeHistory();
-        int count = 0;
         List<GradeHistory> results = null;
         for (String url : urls) {
-            try {
-                results = ucsbGradeHistoryService.getGradeData(url);
-                GradeHistory topRow = results.get(0);
-                gradeHistoryRepository.upsertAll(results);
-                count++;
-                logProgress(ctx, topRow, previous, count);
-            } catch (Exception e) {
-                ctx.log("Exception processing url: " + url);
-                ctx.log("results: " + results);
-                ctx.log(e.toString());
-                throw e;
-            }
+            results = ucsbGradeHistoryService.getGradeData(url);
+            GradeHistory topRow = results.get(0);
+            upsertAll(gradeHistoryRepository, results);
+            logProgress(ctx, topRow, previous);
         }
 
         ctx.log("Finished updating UCSB Grade History Data");
     }
 
-    private void logProgress(JobContext ctx, GradeHistory topRow, GradeHistory previous, int count) {
-        if (!topRow.getYear().equals(previous.getYear())) {
-            ctx.log("Processing data for year: " + topRow.getYear());
-            previous.setYear(topRow.getYear());
+    private void logProgress(JobContext ctx, GradeHistory topRow, GradeHistory previous) {
+        if (!topRow.getYyyyq().equals(previous.getYyyyq())) {
+            ctx.log("Processing data for year: " + topRow.getYyyyq());
+            previous.setYyyyq(topRow.getYyyyq());
         }
-        if (!topRow.getSubjectArea().equals(previous.getSubjectArea())) {
-            ctx.log("Processing data for subjectArea: " + topRow.getSubjectArea());
-            previous.setSubjectArea(topRow.getSubjectArea());
+        ctx.log("Processing data for subjectArea: " + topRow.getSubjectArea());
+    }
+
+    public static List<GradeHistory> upsertAll(
+            GradeHistoryRepository gradeHistoryRepository,
+            List<GradeHistory> gradeHistories) {
+        List<GradeHistory> result = new ArrayList<GradeHistory>();
+        for (GradeHistory gradeHistory : gradeHistories) {
+            List<GradeHistory> query = gradeHistoryRepository.findByYyyyqAndCourseAndInstructorAndGrade(
+                    gradeHistory.getYyyyq(), gradeHistory.getCourse(), gradeHistory.getInstructor(),
+                    gradeHistory.getGrade());
+            if (query.size() == 0) {
+                gradeHistory = gradeHistoryRepository.save(gradeHistory);
+                result.add(gradeHistory);
+            } else {
+                GradeHistory existing = query.get(0);
+                existing.setCount(gradeHistory.getCount());
+                existing = gradeHistoryRepository.save(existing);
+                result.add(existing);
+            }
         }
-        if (count % 100 == 0) {
-            ctx.log("Processed " + count + " courses");
-        }
+        return result;
     }
 }

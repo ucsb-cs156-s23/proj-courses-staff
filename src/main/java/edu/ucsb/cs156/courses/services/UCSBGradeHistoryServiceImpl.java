@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 
 import edu.ucsb.cs156.courses.entities.GradeHistory;
+import edu.ucsb.cs156.courses.models.Quarter;
 import edu.ucsb.cs156.courses.models.github.ApiResult;
 import edu.ucsb.cs156.courses.models.github.TreeElement;
 
@@ -40,8 +41,8 @@ public class UCSBGradeHistoryServiceImpl implements UCSBGradeHistoryService {
     @Autowired
     ObjectMapper mapper;
 
-    private final String REPO_OWNER_AND_NAME = "rtora/UCSB_Grades";
-    private final String API_ENDPOINT = "https://api.github.com/repos/"
+    public static final String REPO_OWNER_AND_NAME = "ucsb-cs156/UCSB_Grades";
+    public static final String API_ENDPOINT = "https://api.github.com/repos/"
             + REPO_OWNER_AND_NAME +
             "/git/trees/main?recursive=1";
 
@@ -63,7 +64,7 @@ public class UCSBGradeHistoryServiceImpl implements UCSBGradeHistoryService {
         ApiResult apiResult = mapper.readValue(re.getBody(), ApiResult.class);
 
         List<TreeElement> treeElements = apiResult.getTree();
-        List<String> urls = treeElements.stream().map(treeElement -> treeElement.getPath()).filter(path -> (path.startsWith("csv/") && path.endsWith(".csv"))).collect(Collectors.toList());
+        List<String> urls = treeElements.stream().map(treeElement -> treeElement.getPath()).filter(path -> (path.startsWith("quarters/") && path.endsWith(".csv"))).collect(Collectors.toList());
         List<String> rawUrls = urls.stream().map(url -> "https://raw.githubusercontent.com/" + REPO_OWNER_AND_NAME + "/main/" + url).collect(Collectors.toList());
         return rawUrls;
     }
@@ -86,17 +87,16 @@ public class UCSBGradeHistoryServiceImpl implements UCSBGradeHistoryService {
         List<GradeHistory> gradeHistoryList = new ArrayList<GradeHistory>();
         log.info("Parsing CSV file with grade history... ");
         CSVReader csvReader = new CSVReader(reader);
+        csvReader.skip(1);
         List<String[]> myEntries = csvReader.readAll();
         for (String[] row : myEntries) {
+            String yyyyq = Integer.toString(Quarter.qyyToyyyyQ(row[0]));
             GradeHistory gradeHistory =  GradeHistory.builder()
-            .year(row[0])
-            .quarter(row[1])
-            .level(row[2])
-            .subjectArea(row[3])
-            .course(row[4])
-            .instructor(row[5])
-            .grade(row[6])
-            .count(Integer.parseInt(row[7]))
+            .yyyyq(yyyyq)
+            .course(row[2])
+            .instructor(row[3])
+            .grade(row[4])
+            .count(Integer.parseInt(row[5]))
             .build();
             log.info("Parsed: " + gradeHistory.toString());
             gradeHistoryList.add(gradeHistory);
