@@ -64,8 +64,11 @@ public class UCSBGradeHistoryServiceImpl implements UCSBGradeHistoryService {
         ApiResult apiResult = mapper.readValue(re.getBody(), ApiResult.class);
 
         List<TreeElement> treeElements = apiResult.getTree();
-        List<String> urls = treeElements.stream().map(treeElement -> treeElement.getPath()).filter(path -> (path.startsWith("quarters/") && path.endsWith(".csv"))).collect(Collectors.toList());
-        List<String> rawUrls = urls.stream().map(url -> "https://raw.githubusercontent.com/" + REPO_OWNER_AND_NAME + "/main/" + url).collect(Collectors.toList());
+        List<String> urls = treeElements.stream().map(treeElement -> treeElement.getPath())
+                .filter(path -> (path.startsWith("quarters/") && path.endsWith(".csv"))).collect(Collectors.toList());
+        List<String> rawUrls = urls.stream()
+                .map(url -> "https://raw.githubusercontent.com/" + REPO_OWNER_AND_NAME + "/main/" + url)
+                .collect(Collectors.toList());
         return rawUrls;
     }
 
@@ -91,13 +94,13 @@ public class UCSBGradeHistoryServiceImpl implements UCSBGradeHistoryService {
         List<String[]> myEntries = csvReader.readAll();
         for (String[] row : myEntries) {
             String yyyyq = Integer.toString(Quarter.qyyToyyyyQ(row[0]));
-            GradeHistory gradeHistory =  GradeHistory.builder()
-            .yyyyq(yyyyq)
-            .course(row[2])
-            .instructor(row[3])
-            .grade(row[4])
-            .count(Integer.parseInt(row[5]))
-            .build();
+            GradeHistory gradeHistory = GradeHistory.builder()
+                    .yyyyq(yyyyq)
+                    .course(row[2])
+                    .instructor(row[3])
+                    .grade(row[4])
+                    .count(Integer.parseInt(row[5]))
+                    .build();
             log.info("Parsed: " + gradeHistory.toString());
             gradeHistoryList.add(gradeHistory);
         }
