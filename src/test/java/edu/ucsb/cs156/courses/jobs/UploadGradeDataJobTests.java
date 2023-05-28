@@ -46,6 +46,13 @@ public class UploadGradeDataJobTests {
                 .grade("A")
                 .count(50)
                 .build();
+        GradeHistory existingOneUpdated = GradeHistory.builder()
+                .yyyyq("20204")
+                .course("CMPSC   156")
+                .instructor("CONRAD P")
+                .grade("A")
+                .count(51)
+                .build();
         GradeHistory newOne = GradeHistory.builder()
                 .yyyyq("20204")
                 .course("CMPSC   148")
@@ -54,7 +61,7 @@ public class UploadGradeDataJobTests {
                 .count(50)
                 .build();
 
-        gradeHistoriesToUpsert.add(existingOne);
+        gradeHistoriesToUpsert.add(existingOneUpdated);
         gradeHistoriesToUpsert.add(newOne);
         
         when(gradeHistoryRepository.findByYyyyqAndCourseAndInstructorAndGrade(eq("20204"), eq("CMPSC   156"), eq("CONRAD P"), eq("A")))
@@ -63,8 +70,8 @@ public class UploadGradeDataJobTests {
         when(gradeHistoryRepository.findByYyyyqAndCourseAndInstructorAndGrade(eq("20204"), eq("CMPSC   148"), eq("HOLLERER T"), eq("A")))
             .thenReturn(Arrays.asList());
 
-        when(gradeHistoryRepository.save(eq(existingOne)))
-            .thenReturn(existingOne);
+        when(gradeHistoryRepository.save(eq(existingOneUpdated)))
+            .thenReturn(existingOneUpdated);
 
         when(gradeHistoryRepository.save(eq(newOne)))
             .thenReturn(newOne);
@@ -81,7 +88,7 @@ public class UploadGradeDataJobTests {
 
         verify(gradeHistoryRepository).findByYyyyqAndCourseAndInstructorAndGrade(eq("20204"), eq("CMPSC   156"), eq("CONRAD P"), eq("A"));
         verify(gradeHistoryRepository).findByYyyyqAndCourseAndInstructorAndGrade(eq("20204"), eq("CMPSC   148"), eq("HOLLERER T"), eq("A"));
-        verify(gradeHistoryRepository).save(existingOne);
+        verify(gradeHistoryRepository).save(existingOneUpdated);
         verify(gradeHistoryRepository).save(newOne);
         
     }
