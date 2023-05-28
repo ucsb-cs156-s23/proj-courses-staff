@@ -50,21 +50,21 @@ public class UCSBSubjectsController extends ApiController {
     @ApiOperation(value = "Load subjects into database from UCSB API")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/load")
-    public List<UCSBSubject> loadSubjects() throws JsonProcessingException{
-       
+    public List<UCSBSubject> loadSubjects() throws JsonProcessingException {
+
         List<UCSBSubject> subjects = ucsbSubjectsService.get();
-        
+
         List<UCSBSubject> savedSubjects = new ArrayList<UCSBSubject>();
 
-        subjects.forEach((ucsbSubject)->{
+        subjects.forEach((ucsbSubject) -> {
             try {
-              subjectRepository.save(ucsbSubject);
-              savedSubjects.add(ucsbSubject);
+                subjectRepository.save(ucsbSubject);
+                savedSubjects.add(ucsbSubject);
             } catch (DuplicateKeyException dke) {
                 log.info("Skipping duplicate entity %s".formatted(ucsbSubject.getSubjectCode()));
             }
         });
-        log.info("subjects={}",subjects);
+        log.info("subjects={}", subjects);
         return savedSubjects;
     }
 
@@ -72,7 +72,8 @@ public class UCSBSubjectsController extends ApiController {
     @PreAuthorize("hasRole('ROLE_USER') || hasRole('ROLE_ADMIN')")
     @GetMapping("")
     public UCSBSubject getSubjectById(
-            @ApiParam("subjectCode") @RequestParam String subjectCode) throws JsonProcessingException {
+            @ApiParam(name = "subjectCode", type = "String", value = "code for subject area, e.g. CMPSC for Computer Science", example = "CMPSC", required = true)
+            @RequestParam String subjectCode) throws JsonProcessingException {
 
         UCSBSubject subject = subjectRepository.findById(subjectCode)
                 .orElseThrow(() -> new EntityNotFoundException(UCSBSubject.class, subjectCode));
@@ -84,7 +85,8 @@ public class UCSBSubjectsController extends ApiController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("")
     public Object deleteSubject(
-            @ApiParam("subjectCode") @RequestParam String subjectCode) {
+            @ApiParam(name = "subjectCode", type = "String", value = "code for subject area, e.g. CMPSC for Computer Science", example = "CMPSC", required = true)
+            @RequestParam String subjectCode) {
 
         UCSBSubject subject = subjectRepository.findById(subjectCode)
                 .orElseThrow(() -> new EntityNotFoundException(UCSBSubject.class, subjectCode));
