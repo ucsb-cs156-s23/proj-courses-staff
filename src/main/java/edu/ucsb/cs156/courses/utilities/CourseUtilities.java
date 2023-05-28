@@ -17,7 +17,7 @@ public class CourseUtilities {
      * followed
      * by the suffix (if any) left justified in a 2 character field.
      * 
-     * Examples: (the <code>1234567812312<code> line is there to show the spacing.)
+     * Examples: (the <code>1234567812312</code> line is there to show the spacing.)
      * 
      * <pre>
      * 1234567812312
